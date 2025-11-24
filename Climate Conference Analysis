@@ -1,0 +1,320 @@
+-- 1. [LEFT JOIN]
+-- Question: Which VIPs are presenting at events and what type of event is it?
+
+SELECT 
+    vips.first_name,
+    vips.last_name,
+    events.event_name,
+    events.event_type
+FROM vips
+LEFT JOIN events
+    ON vips.event = events.event_id;
+
+
+-- 2. [INNER JOIN]
+-- Question: Which VIPs have hotel reservations?
+
+SELECT 
+    vips.first_name,
+    vips.last_name,
+    reservations.hotel
+FROM vips
+INNER JOIN reservations
+    ON vips.member_id = reservations.member_id;
+
+
+-- 3. [MULTIPLE JOINS]
+-- Question: Which VIPs are staying at hotels and what are the hotel names?
+
+SELECT 
+    vips.first_name,
+    vips.last_name,
+    hotels.hotel_name,
+    hotels.address
+FROM vips
+JOIN reservations
+    ON vips.member_id = reservations.member_id
+JOIN hotels
+    ON reservations.hotel = hotels.hotel_id;
+
+
+-- 4. [SELF JOIN]
+-- Question: Who gives feedback to whom?
+
+SELECT 
+    a.first_name AS reviewer_first_name,
+    a.last_name AS reviewer_last_name,
+    b.first_name AS reviewed_first_name,
+    b.last_name AS reviewed_last_name
+FROM vips a
+JOIN vips b
+    ON a.provides_feedback_to = b.member_id;
+
+
+-- 5. [YOUR CHOICE – BIT DATA TYPE]
+-- Question: Who RSVPed YES to BOTH welcome party and dinner?
+
+SELECT 
+    vips.first_name,
+    vips.last_name
+FROM vips
+JOIN reservations
+    ON vips.member_id = reservations.member_id
+WHERE welcome_rsvp = 1
+  AND dinner_rsvp = 1;
+
+
+-- 6. [SUBQUERY]
+-- Question: Which VIPs are presenting at keynote events?
+
+SELECT first_name, last_name
+FROM vips
+WHERE event IN (
+    SELECT event_id 
+    FROM events 
+    WHERE event_type = 'Keynote'
+);
+4. How This Makes Your Portfolio Look Impressive
+In your GitHub project, add comments like:
+
+sql
+Copy code
+-- Climate Conference Analysis Project
+-- Goal: Analyze VIP participation, hotel reservations, event types, and feedback relationships
+-- This project demonstrates joins, subqueries, and relationship analysis
+This signals to hiring managers that you understand real-world use cases, not just syntax.
+
+5. Want Me To Help You Level This Up?
+If you want, I can help you:
+
+✅ Write portfolio-ready explanations
+✅ Make these questions even more advanced
+✅ Help you describe this like a real data analyst on your resume
+
+Just tell me:
+Do you want this to look beginner, intermediate, or advanced for your portfolio?
+
+
+
+
+
+
+
+You said:
+make it look intermediate give the final thing to copy into github
+
+
+ChatGPT said:
+
+Thought for 40s
+Here’s a solid intermediate-level SQL file you can copy straight into GitHub for your portfolio.
+
+sql
+Copy code
+-- =========================================================
+-- Climate Conference Analysis
+-- Data source: conference_db (vips, reservations, hotels, events)
+-- Author: Your Name Here
+-- Description:
+--   Analysis of VIP participation at a climate research conference.
+--   Demonstrates LEFT JOIN, INNER JOIN, multiple JOINs, SELF JOIN,
+--   and a subquery, plus use of BIT (0/1) RSVP flags.
+-- =========================================================
+
+
+-- =========================================================
+-- TABLE REFERENCE (from project instructions)
+-- ---------------------------------------------------------
+-- vips(member_id, last_name, first_name, event, provides_feedback_to,
+--      association, assoc_type, member_since)
+--
+-- reservations(member_id, hotel, welcome_rsvp, dinner_rsvp)
+--   - welcome_rsvp, dinner_rsvp are BIT/boolean style:
+--       1 = yes / attending
+--       0 = no / not attending
+--
+-- hotels(hotel_id, hotel_name, address)
+--
+-- events(event_id, event_name, event_type)
+-- =========================================================
+
+
+
+-- =========================================================
+-- 1. [LEFT JOIN]
+-- Question:
+--   List every VIP and, if they are presenting, show the event name and type.
+--   This helps see who is attached to an event and who is not.
+-- Technique:
+--   LEFT JOIN so that VIPs without an event still appear in the results.
+-- =========================================================
+
+SELECT 
+    v.member_id,
+    v.first_name,
+    v.last_name,
+    e.event_name,
+    e.event_type
+FROM vips AS v
+LEFT JOIN events AS e
+    ON v.event = e.event_id
+ORDER BY 
+    v.last_name,
+    v.first_name;
+
+
+
+-- =========================================================
+-- 2. [INNER JOIN]
+-- Question:
+--   Which VIPs have any reservation on file (hotel + RSVP info)?
+--   This answers: who is fully set up in the reservations system.
+-- Technique:
+--   INNER JOIN between vips and reservations to keep only VIPs
+--   that appear in both tables.
+-- =========================================================
+
+SELECT 
+    v.member_id,
+    v.first_name,
+    v.last_name,
+    r.hotel,
+    r.welcome_rsvp,
+    r.dinner_rsvp
+FROM vips AS v
+INNER JOIN reservations AS r
+    ON v.member_id = r.member_id
+ORDER BY 
+    v.last_name,
+    v.first_name;
+
+
+
+-- =========================================================
+-- 3. [MULTIPLE JOINS]
+-- Question:
+--   For each VIP with a reservation, which hotel are they staying at
+--   and what are the hotel details?
+--   This gives the event team a quick view of VIP distribution by hotel.
+-- Technique:
+--   vips  -> reservations  -> hotels
+--   (JOIN + JOIN) to pull VIP names, RSVP info, and hotel details.
+-- =========================================================
+
+SELECT 
+    v.member_id,
+    v.first_name,
+    v.last_name,
+    h.hotel_name,
+    h.address,
+    r.welcome_rsvp,
+    r.dinner_rsvp
+FROM vips AS v
+JOIN reservations AS r
+    ON v.member_id = r.member_id
+JOIN hotels AS h
+    ON r.hotel = h.hotel_id
+ORDER BY 
+    h.hotel_name,
+    v.last_name,
+    v.first_name;
+
+
+
+-- =========================================================
+-- 4. [SELF JOIN]
+-- Question:
+--   Who is giving feedback to whom?
+--   Each VIP is assigned to provide feedback to another VIP.
+--   This is useful to verify feedback assignments and relationships.
+-- Technique:
+--   SELF JOIN on vips:
+--     - "reviewer" is the VIP giving feedback
+--     - "reviewed" is the VIP receiving feedback
+-- =========================================================
+
+SELECT 
+    reviewer.member_id        AS reviewer_id,
+    reviewer.first_name       AS reviewer_first_name,
+    reviewer.last_name        AS reviewer_last_name,
+    reviewed.member_id        AS reviewed_id,
+    reviewed.first_name       AS reviewed_first_name,
+    reviewed.last_name        AS reviewed_last_name
+FROM vips AS reviewer
+JOIN vips AS reviewed
+    ON reviewer.provides_feedback_to = reviewed.member_id
+ORDER BY 
+    reviewer.last_name,
+    reviewed.last_name;
+
+
+
+-- =========================================================
+-- 5. [YOUR CHOICE #1 – BIT COLUMNS / RSVP BEHAVIOR]
+-- Question:
+--   Which VIPs said "YES" to BOTH the welcome party and the thank-you dinner?
+--   This identifies highly engaged attendees that are present at all social events.
+-- Technique:
+--   Filter on BIT-style columns:
+--     welcome_rsvp = 1 AND dinner_rsvp = 1
+--   Also join hotels so we can see where these highly engaged VIPs are staying.
+-- =========================================================
+
+SELECT 
+    v.member_id,
+    v.first_name,
+    v.last_name,
+    h.hotel_name
+FROM vips AS v
+JOIN reservations AS r
+    ON v.member_id = r.member_id
+LEFT JOIN hotels AS h
+    ON r.hotel = h.hotel_id
+WHERE r.welcome_rsvp = 1
+  AND r.dinner_rsvp = 1
+ORDER BY 
+    v.last_name,
+    v.first_name;
+
+
+
+-- =========================================================
+-- 6. [YOUR CHOICE #2 – SUBQUERY]
+-- Question:
+--   Which VIPs are presenting at the most common type of event?
+--   (For example, if panels are the most common event type, this returns
+--    all VIPs presenting on panels.)
+-- Technique:
+--   Step 1: In a subquery, find the event_type with the highest count
+--           of VIPs.
+--   Step 2: Use that event_type in the outer query to list all VIPs
+--           presenting at that type of event.
+-- =========================================================
+
+SELECT 
+    v.member_id,
+    v.first_name,
+    v.last_name,
+    e.event_name,
+    e.event_type
+FROM vips AS v
+JOIN events AS e
+    ON v.event = e.event_id
+WHERE e.event_type = (
+    SELECT 
+        e2.event_type
+    FROM vips AS v2
+    JOIN events AS e2
+        ON v2.event = e2.event_id
+    GROUP BY 
+        e2.event_type
+    ORDER BY 
+        COUNT(*) DESC
+    LIMIT 1
+)
+ORDER BY 
+    v.last_name,
+    v.first_name;
+
+
+
