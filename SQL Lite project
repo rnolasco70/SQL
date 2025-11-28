@@ -55,3 +55,48 @@ ON FEB.orderid=cust.order_id
 WHERE Feb.Quantity>2
 AND length(orderid) = 6 
 AND orderid <> 'Order ID'
+
+#8How many of each type of headphone were sold in February? 
+SELECT SUM(Quantity), Product
+FROM BIT_DB.FebSales
+WHERE Product LIKE '%Headphones%'
+AND length(orderid) = 6
+AND orderid <> 'Order ID'
+GROUP BY Product
+
+#9 What was the average amount spent per account in February?
+SELECT SUM(Quantity), Product
+FROM BIT_DB.FebSales
+WHERE Product LIKE '%Headphones%'
+  AND length(orderid) = 6
+  AND orderid <> 'Order ID'
+GROUP BY Product;
+
+#10 Find order ids from Georgia (GA) where the order has an average price greater than $1,000. Only find orders from dates beginning with '04/1'.
+Assume that the dates are stored in the MM/DD/YY HH:MM format. 
+FROM BIT_DB.AprSales
+WHERE orderdate LIKE '04/1%'
+AND location LIKE '%GA%'
+AND length(orderid) = 6
+AND orderid <> 'Order ID'
+GROUP BY orderID
+HAVING AVG(price) > 1000;
+
+#11 You’ve been given the following results from the MaySales table. Can you reverse engineer a SQL query that returns these results?
+The result set will naturally only return 10 rows (i.e., you will not have to use LIMIT to get to 10 results)
+SELECT location, orderID
+FROM BIT_DB.MaySales
+WHERE orderID LIKE '1943_5'
+AND length(orderid) = 6
+AND orderid <> 'Order ID'
+ORDER BY orderID;
+
+#12Which product brought in the most revenue in January and how much revenue did it bring in total?
+In other words, show the one product that generated the most revenue (revenue being equivalent to quantity of an item multiplied by the item’s price). 
+
+SELECT location, orderID
+FROM BIT_DB.MaySales
+WHERE orderID LIKE '1943_5'
+AND length(orderid) = 6
+AND orderid <> 'Order ID'
+ORDER BY orderID;
