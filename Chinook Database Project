@@ -1,0 +1,125 @@
+Chinook Music Store Project  
+Database: https://dbdiagram.io/d/684a02a5a463a450da2640c1?utm_source=dbdiagram_embed&utm_medium=bottom_open
+
+Filter Query: List all customers who are not located in the USA.
+SELECT CustomerId, FirstName, LastName, Country
+FROM customers
+WHERE Country <> 'USA';
+
+Filter Query: Show only customers located in Brazil.
+SELECT CustomerId, FirstName, LastName, Country
+FROM customers
+WHERE Country = 'Brazil';
+
+INNER JOIN: Find the invoices of customers who are from Brazil. The result should show the customer's full name, Invoice ID, Invoice Date, and Billing Country.
+SELECT 
+    c.FirstName || ' ' || c.LastName AS FullName,
+    i.InvoiceId,
+    i.InvoiceDate,
+    i.BillingCountry
+FROM customers c
+INNER JOIN invoices i ON c.CustomerId = i.CustomerId
+WHERE c.Country = 'Brazil';
+
+INNER JOIN: Show the purchased track name for each invoice line ID.
+SELECT 
+    ii.InvoiceLineId,
+    t.Name AS TrackName
+FROM invoice_items ii
+JOIN tracks t ON ii.TrackId = t.TrackId;
+
+Filter Query: Show the employees who are Sales Agents.
+SELECT EmployeeId, FirstName, LastName, Title
+FROM employees
+WHERE Title = 'Sales Support Agent';
+
+DISTINCT Query: Find a unique list of billing countries from the Invoice table.
+SELECT DISTINCT BillingCountry
+FROM invoices;
+
+Multiple JOINs: Show the invoices associated with each Sales Agent. Include the Sales Agent's full name.
+SELECT 
+    e.FirstName || ' ' || e.LastName AS SalesAgent,
+    i.InvoiceId,
+    i.InvoiceDate,
+    i.Total
+FROM employees e
+JOIN customers c ON e.EmployeeId = c.SupportRepId
+JOIN invoices i ON c.CustomerId = i.CustomerId
+WHERE e.Title = 'Sales Support Agent';
+
+Multiple JOINs: Show the Invoice Total, Customer name, Country, and Sales Agent name for all invoices and customers.
+SELECT
+    i.Total AS InvoiceTotal,
+    c.FirstName || ' ' || c.LastName AS CustomerName,
+    c.Country,
+    e.FirstName || ' ' || e.LastName AS SalesAgent
+FROM invoices i
+JOIN customers c ON i.CustomerId = c.CustomerId
+JOIN employees e ON c.SupportRepId = e.EmployeeId;
+
+Aggregate Query: How many invoices were there in 2009?
+SELECT COUNT(*) AS InvoiceCount
+FROM invoices
+WHERE InvoiceDate LIKE '2009%';
+
+Aggregate Query: What are the total sales for 2009?
+SELECT SUM(Total) AS TotalSales2009
+FROM invoices
+WHERE InvoiceDate LIKE '2009%';
+
+Multiple JOINs: Show the purchased track name and artist name for each invoice line ID.
+SELECT 
+    ii.InvoiceLineId,
+    t.Name AS TrackName,
+    ar.Name AS ArtistName
+FROM invoice_items ii
+JOIN tracks t ON ii.TrackId = t.TrackId
+JOIN albums al ON t.AlbumId = al.AlbumId
+JOIN artists ar ON al.ArtistId = ar.ArtistId;
+
+Multiple JOINs: Show all tracks with their album name, media type, and genre.
+SELECT
+    t.Name AS TrackName,
+    al.Title AS AlbumName,
+    mt.Name AS MediaType,
+    g.Name AS Genre
+FROM tracks t
+JOIN albums al ON t.AlbumId = al.AlbumId
+JOIN media_types mt ON t.MediaTypeId = mt.MediaTypeId
+JOIN genres g ON t.GenreId = g.GenreId;
+
+Multiple JOINs + Aggregation: Show the total sales made by each Sales Agent.
+SELECT
+    e.FirstName || ' ' || e.LastName AS SalesAgent,
+    SUM(i.Total) AS TotalSales
+FROM employees e
+JOIN customers c ON e.EmployeeId = c.SupportRepId
+JOIN invoices i ON c.CustomerId = i.CustomerId
+WHERE e.Title = 'Sales Support Agent'
+GROUP BY e.EmployeeId;
+
+Multiple JOINs + Aggregation: Show the total sales made by each Sales Agent.
+SELECT
+    e.FirstName || ' ' || e.LastName AS SalesAgent,
+    SUM(i.Total) AS TotalSales
+FROM employees e
+JOIN customers c ON e.EmployeeId = c.SupportRepId
+JOIN invoices i ON c.CustomerId = i.CustomerId
+WHERE e.Title = 'Sales Support Agent'
+GROUP BY e.EmployeeId;
+
+Multiple JOINs + Aggregation: Which sales agent made the most dollars in sales in 2009?
+SELECT
+    e.FirstName || ' ' || e.LastName AS SalesAgent,
+    SUM(i.Total) AS TotalSales2009
+FROM employees e
+JOIN customers c ON e.EmployeeId = c.SupportRepId
+JOIN invoices i ON c.CustomerId = i.CustomerId
+WHERE e.Title = 'Sales Support Agent'
+  AND i.InvoiceDate LIKE '2009%'
+GROUP BY e.EmployeeId
+ORDER BY TotalSales2009 DESC
+LIMIT 1;
+
+
